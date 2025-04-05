@@ -164,10 +164,19 @@ exports.deleteAppointment = async (req, res, next) => {
     try {
         const appointment = await Appointment.findById(req.params.id)
 
+        const userId = req.user.id
+
         if (!appointment) {
             return res.status(404).json({
                 success: false,
                 message: `No appointment with the id of ${req.params.id}`
+            })
+        }
+
+        if (appointment.user !== userId && req.user.role !== 'admin') {
+            return res.status(400).json({
+                success: false,
+                message: `User ${userId} is not authorized to delete this appointment`
             })
         }
 
