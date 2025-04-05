@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const axios = require("axios");
 
 //@desc     Register user
 //@route    POST /api/v1/auth/register
@@ -18,7 +19,7 @@ exports.register = async (req, res, next) => {
       postalcode,
     } = req.body;
 
-    // Top-level required fields
+    // Validate required fields
     const requiredFields = {
       name,
       email,
@@ -34,12 +35,30 @@ exports.register = async (req, res, next) => {
       .filter(([_, value]) => !value)
       .map(([key]) => key);
 
-    // Check if any required field is missing
     if (missingFields.length > 0) {
       return res.status(400).json({
         success: false,
         msg: `Missing required fields: ${missingFields.join(", ")}`,
       });
+    }
+
+    // Geocoding request to HERE API
+    const apiKey = process.env.HERE_API_KEY;
+    const fullAddress = `${address} ${district} ${province} ${postalcode}`;
+    const geocodeUrl = `https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(
+      fullAddress
+    )}&apiKey=${apiKey}`;
+
+    const geoRes = await axios.get(geocodeUrl);
+    const geoItems = geoRes.data.items;
+
+    let latitude = null;
+    let longitude = null;
+
+    if (geoItems && geoItems.length > 0) {
+      const position = geoItems[0].position;
+      latitude = position.lat;
+      longitude = position.lng;
     }
 
     // Create user
@@ -53,6 +72,8 @@ exports.register = async (req, res, next) => {
       district,
       province,
       postalcode,
+      latitude,
+      longitude,
     });
 
     sendTokenResponse(user, 200, res);

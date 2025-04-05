@@ -34,7 +34,6 @@ const CompanySchema = new mongoose.Schema(
       type: Number,
       required: [true, "Longitude is required"],
     },
-
     tel: {
       type: String,
     },
