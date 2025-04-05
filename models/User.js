@@ -22,33 +22,23 @@ const UserSchema = new mongoose.Schema({
     required: [true, "Please add a telephone number"],
     match: [/^(0[689]{1}[0-9]{8})$/, "Please add a valid telephone number"],
   },
-  //ADDED: home address
-  homeAddress: {
-    houseNumber: {
-      type: String,
-      required: [true, "Please enter the house number"],
-    },
-    village: { type: String },
-    moo: { type: String },
-    soi: { type: String },
-    road: { type: String },
-    subdistrict: {
-      type: String,
-      required: [true, "Please enter the subdistrict (ตำบล/แขวง)"],
-    },
-    district: {
-      type: String,
-      required: [true, "Please enter the district (อำเภอ/เขต)"],
-    },
-    province: {
-      type: String,
-      required: [true, "Please enter the province"],
-    },
-    postalCode: {
-      type: String,
-      required: [true, "Please enter the postal code"],
-      match: [/^\d{5}$/, "Postal code must be 5 digits"],
-    },
+  //ADDED: homeaddress
+  address: {
+    type: String,
+    required: [true, "Please add an address"],
+  },
+  district: {
+    type: String,
+    required: [true, "Please add a district"],
+  },
+  province: {
+    type: String,
+    required: [true, "Please add a province"],
+  },
+  postalcode: {
+    type: String,
+    required: [true, "Please add a postal code"],
+    maxlength: [5, "Postal Code can not be more than 5 digits"],
   },
   //ADDED: geolocation (latitude and longitude)
   latitude: {
