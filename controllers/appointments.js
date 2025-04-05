@@ -1,5 +1,7 @@
-const Appointment = require("../models/Appoinment");
+const Appointment = require("../models/Appointment");
 const Company = require("../models/Company");
+const User = require("../models/User");
+const axios = require("axios");
 
 //@desc     Get all appointments
 //@route    GET /api/v1/appointments
@@ -90,7 +92,14 @@ exports.addAppointment = async (req, res, next) => {
       });
     }
 
-    const user = req.user;
+    // ✅ Necessary: get user's coordinates from DB
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: `No user found`,
+      });
+    }
 
     // ✅ Validate apptDate is between May 10–13, 2022
     const selectedDate = new Date(req.body.apptDate);
@@ -113,7 +122,7 @@ exports.addAppointment = async (req, res, next) => {
       });
     }
 
-    // ✅ Call TravelTime API for travel time between user and company
+    // ✅ Call TravelTime API
     const travelTimeRes = await axios.post(
       "https://api.traveltimeapp.com/v4/routes",
       {
@@ -141,7 +150,7 @@ exports.addAppointment = async (req, res, next) => {
             },
             departure_location_id: "point-from",
             arrival_location_ids: ["point-to-1"],
-            departure_time: "2025-04-05T09:00:00+01:00", // fixed or dynamic
+            departure_time: "2025-04-05T09:00:00+01:00", // can be dynamic
             properties: ["travel_time"],
           },
         ],
@@ -155,8 +164,8 @@ exports.addAppointment = async (req, res, next) => {
         },
       }
     );
-
-    // ✅ Extract travel time in seconds
+    console.log(travelTimeRes.data);
+    // ✅ Extract travel time
     const travelTime =
       travelTimeRes.data.results[0]?.locations[0]?.properties[0]?.travel_time;
 
@@ -167,11 +176,10 @@ exports.addAppointment = async (req, res, next) => {
       });
     }
 
-    // ✅ Add user + travel time to the body
+    // ✅ Create the appointment with travelTime
     req.body.user = req.user.id;
     req.body.travelTime = travelTime;
 
-    // ✅ Create appointment
     const appointment = await Appointment.create(req.body);
 
     res.status(200).json({
