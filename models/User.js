@@ -50,6 +50,13 @@ const UserSchema = new mongoose.Schema({
       match: [/^\d{5}$/, "Postal code must be 5 digits"],
     },
   },
+  //ADDED: geolocation (latitude and longitude)
+  latitude: {
+    type: Number,
+  },
+  longitude: {
+    type: Number,
+  },
   role: {
     type: String,
     enum: ["user", "admin"],
