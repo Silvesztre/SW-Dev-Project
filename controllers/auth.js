@@ -155,3 +155,36 @@ exports.logout = async (req, res, next) => {
     data: {},
   });
 };
+
+
+exports.changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, error: "Please provide current and new passwords" });
+    }
+
+    let user = await User.findById(req.user.id).select("+password");
+
+    const isMatch = await user.matchPassword(currentPassword);
+
+    if (!isMatch) {
+      return res.status(401).json({ success: false, error: "Current password is incorrect" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (err) {
+    return res.status(400).json({
+      success: false,
+      message: "Failed to change password",
+      error: err.message,
+    })
+  }
+}

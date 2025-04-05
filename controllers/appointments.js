@@ -173,6 +173,7 @@ exports.deleteAppointment = async (req, res, next) => {
             })
         }
 
+        // Check if the user is the owner of the appointment
         if (appointment.user !== userId && req.user.role !== 'admin') {
             return res.status(400).json({
                 success: false,
