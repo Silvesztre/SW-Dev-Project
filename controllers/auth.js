@@ -6,31 +6,39 @@ const User = require("../models/User");
 
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password, role, telephone, homeAddress } = req.body;
+    const {
+      name,
+      email,
+      password,
+      role,
+      telephone,
+      address,
+      district,
+      province,
+      postalcode,
+    } = req.body;
 
-    // Validate required fields
-    if (!name || !email || !password || !telephone || !homeAddress) {
-      return res.status(400).json({
-        success: false,
-        msg: "Please provide all required fields: name, email, password, telephone, and homeAddress",
-      });
-    }
+    // Top-level required fields
+    const requiredFields = {
+      name,
+      email,
+      password,
+      telephone,
+      address,
+      district,
+      province,
+      postalcode,
+    };
 
-    // Validate nested homeAddress fields
-    const requiredAddressFields = [
-      "houseNumber",
-      "subdistrict",
-      "district",
-      "province",
-      "postalCode",
-    ];
-    const missingFields = requiredAddressFields.filter(
-      (field) => !homeAddress[field]
-    );
+    const missingFields = Object.entries(requiredFields)
+      .filter(([_, value]) => !value)
+      .map(([key]) => key);
+
+    // Check if any required field is missing
     if (missingFields.length > 0) {
       return res.status(400).json({
         success: false,
-        msg: `Missing required address fields: ${missingFields.join(", ")}`,
+        msg: `Missing required fields: ${missingFields.join(", ")}`,
       });
     }
 
@@ -41,15 +49,15 @@ exports.register = async (req, res, next) => {
       password,
       role,
       telephone,
-      homeAddress,
+      address,
+      district,
+      province,
+      postalcode,
     });
 
     sendTokenResponse(user, 200, res);
   } catch (err) {
-    // ✅ Log full stack to console (for debugging)
     console.error(err.stack);
-
-    // ✅ Send error message to client (friendly)
     res.status(400).json({
       success: false,
       msg: err.message || "Registration failed",
