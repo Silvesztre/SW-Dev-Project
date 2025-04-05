@@ -3,7 +3,7 @@ const { register, login, getMe, logout, changePassword } = require('../controlle
 const { OAuth2Client } = require("google-auth-library")
 const dotenv = require('dotenv')
 
-dotenv.config({ path: '../config.env' })
+dotenv.config({ path: '../config/config.env' })
 
 const router = express.Router()
 
@@ -17,10 +17,10 @@ router.put('/change-password', protect, changePassword)
 
 // Google OAuth
 router.post('/oauth', async function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:5000')
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000')
     res.header('Referrer-Policy', 'no-referrer-when-downgrade')
-
-    const redirectUrl = 'http://127.0.0.1:3000/oauth'
+    
+    const redirectUrl = 'http://127.0.0.1:5000/oauth'
 
     const oAuth2Client = new OAuth2Client(
         process.env.CLIENT_ID,
@@ -37,19 +37,19 @@ router.post('/oauth', async function(req, res, next) {
     res.json({url:authorizeUrl})
 })
 
-async function getUserData(access_token) {
+/* async function getUserData(access_token) {
     const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token${access_token}`)
     const data = await response.json()
     console.log(`data: ${data}`)
-}
+} */
 
 /* GET home page */
-router.get('/oauth', async function (req, res, next) {
+/* router.get('/oauth', async function (req, res, next) {
     const code = req.query.code
     try {
-        const redirectUrl = 'http://127.0.0.1:3000/oauth'
+        const redirectUrl = 'http://127.0.0.1:5000/oauth'
         const oAuth2Client = new OAuth2Client(
-            process.env.CLIENT_ID,
+            process.env.CLIENT_ID, 
             process.env.CLIENT_SECRET,
             redirectUrl
         )
@@ -62,7 +62,7 @@ router.get('/oauth', async function (req, res, next) {
     } catch (err) {
         console.log("Error with signing in with Google")
     }
-}) 
+})  */
 
 
 module.exports = router

@@ -21,6 +21,7 @@ connectDB()
 const companies = require('./routes/companies')
 const appointments = require('./routes/appointments')
 const auth = require('./routes/auth')
+const oauth = require('./routes/oauth')
 
 const app = express()
 
@@ -53,6 +54,7 @@ app.use(hpp())
 app.use('/api/v1/companies', companies)
 app.use('/api/v1/appointments', appointments)
 app.use('/api/v1/auth', auth)
+app.use('/oauth', oauth)
 
 const PORT = process.env.PORT || 5000
 
