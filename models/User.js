@@ -24,18 +24,30 @@ const UserSchema = new mongoose.Schema({
   },
   //ADDED: home address
   homeAddress: {
-    houseNumber: { type: String, required: true }, // เลขที่
-    village: { type: String }, // หมู่บ้าน (optional)
-    moo: { type: String }, // หมู่ที่ (e.g., หมู่ 4)
-    soi: { type: String }, // ซอย (e.g., ซอย 7)
-    road: { type: String }, // ถนน (e.g., ถนนพหลโยธิน)
-    subdistrict: { type: String, required: true }, // ตำบล/แขวง
-    district: { type: String, required: true }, // อำเภอ/เขต
-    province: { type: String, required: true }, // จังหวัด
+    houseNumber: {
+      type: String,
+      required: [true, "Please enter the house number"],
+    },
+    village: { type: String },
+    moo: { type: String },
+    soi: { type: String },
+    road: { type: String },
+    subdistrict: {
+      type: String,
+      required: [true, "Please enter the subdistrict (ตำบล/แขวง)"],
+    },
+    district: {
+      type: String,
+      required: [true, "Please enter the district (อำเภอ/เขต)"],
+    },
+    province: {
+      type: String,
+      required: [true, "Please enter the province"],
+    },
     postalCode: {
       type: String,
-      required: true,
-      match: [/^\d{5}$/, "Please enter a valid 5-digit Thai postal code"],
+      required: [true, "Please enter the postal code"],
+      match: [/^\d{5}$/, "Postal code must be 5 digits"],
     },
   },
   role: {
