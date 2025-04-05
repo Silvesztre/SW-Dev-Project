@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema({
     ],
   },
   //ADDED: telephone number in a thai format numbers only
-  telephone: {
+  tel: {
     type: String,
     required: [true, "Please add a telephone number"],
     match: [/^(0[689]{1}[0-9]{8})$/, "Please add a valid telephone number"],
