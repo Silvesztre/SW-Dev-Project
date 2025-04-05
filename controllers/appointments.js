@@ -164,6 +164,9 @@ exports.updateAppointment = async (req, res, next) => {
 //@desc     Delete appointment
 //@route    DELETE /api/v1/appointments/:id
 //@access   Private
+// @desc     Delete appointment
+// @route    DELETE /api/v1/appointments/:id
+// @access   Private
 exports.deleteAppointment = async (req, res, next) => {
   try {
     const appointment = await Appointment.findById(req.params.id);
@@ -175,6 +178,17 @@ exports.deleteAppointment = async (req, res, next) => {
       });
     }
 
+    // ✅ ADDED: Allow only the owner or an admin to delete
+    if (
+      appointment.user.toString() !== req.user.id && // ✅ ADDED: Check ownership
+      req.user.role !== "admin" // ✅ ADDED: Admin bypass
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to delete this appointment", // ✅ ADDED: Custom unauthorized message
+      });
+    }
+
     await appointment.deleteOne();
 
     res.status(200).json({
@@ -182,7 +196,7 @@ exports.deleteAppointment = async (req, res, next) => {
       data: {},
     });
   } catch (error) {
-    console.log(error);
+    console.log(error.stack);
     return res.status(500).json({
       success: false,
       message: "Cannot delete Appointment",
