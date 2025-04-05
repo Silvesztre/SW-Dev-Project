@@ -175,9 +175,6 @@ exports.updateAppointment = async (req, res, next) => {
   }
 };
 
-//@desc     Delete appointment
-//@route    DELETE /api/v1/appointments/:id
-//@access   Private
 // @desc     Delete appointment
 // @route    DELETE /api/v1/appointments/:id
 // @access   Private
