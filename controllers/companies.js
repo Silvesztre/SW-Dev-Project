@@ -1,5 +1,5 @@
 const Company = require("../models/Company");
-const Appointment = require("../models/Appoinment");
+const Appointment = require("../models/Appointment");
 const axios = require("axios");
 //@desc     Get all companies
 //@route    GET /api/v1/companies
