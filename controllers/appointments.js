@@ -83,7 +83,6 @@ exports.addAppointment = async (req, res, next) => {
     req.body.company = req.params.companyId;
 
     const company = await Company.findById(req.params.companyId);
-
     if (!company) {
       return res.status(404).json({
         success: false,
@@ -91,10 +90,9 @@ exports.addAppointment = async (req, res, next) => {
       });
     }
 
-    // Add user Id to req.body
-    req.body.user = req.user.id;
+    const user = req.user;
 
-    // ✅ ADDED: Validate appointment date is within May 10–13, 2022
+    // ✅ Validate apptDate is between May 10–13, 2022
     const selectedDate = new Date(req.body.apptDate);
     const rangeStart = new Date("2022-05-10T00:00:00");
     const rangeEnd = new Date("2022-05-13T23:59:59");
@@ -106,10 +104,8 @@ exports.addAppointment = async (req, res, next) => {
       });
     }
 
-    // Check for existing appointments
+    // ✅ Limit to 3 appointments per user
     const existedAppointment = await Appointment.find({ user: req.user.id });
-
-    // If the user is not an admin, they can only create 3 appointments
     if (existedAppointment.length >= 3 && req.user.role !== "admin") {
       return res.status(400).json({
         success: false,
@@ -117,6 +113,65 @@ exports.addAppointment = async (req, res, next) => {
       });
     }
 
+    // ✅ Call TravelTime API for travel time between user and company
+    const travelTimeRes = await axios.post(
+      "https://api.traveltimeapp.com/v4/routes",
+      {
+        locations: [
+          {
+            id: "point-from",
+            coords: {
+              lat: user.latitude,
+              lng: user.longitude,
+            },
+          },
+          {
+            id: "point-to-1",
+            coords: {
+              lat: company.latitude,
+              lng: company.longitude,
+            },
+          },
+        ],
+        departure_searches: [
+          {
+            id: "departure-search",
+            transportation: {
+              type: "driving",
+            },
+            departure_location_id: "point-from",
+            arrival_location_ids: ["point-to-1"],
+            departure_time: "2025-04-05T09:00:00+01:00", // fixed or dynamic
+            properties: ["travel_time"],
+          },
+        ],
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-Application-Id": process.env.TRAVELTIME_APP_ID,
+          "X-Api-Key": process.env.TRAVELTIME_API_KEY,
+        },
+      }
+    );
+
+    // ✅ Extract travel time in seconds
+    const travelTime =
+      travelTimeRes.data.results[0]?.locations[0]?.properties[0]?.travel_time;
+
+    if (!travelTime) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to calculate travel time from TravelTime API",
+      });
+    }
+
+    // ✅ Add user + travel time to the body
+    req.body.user = req.user.id;
+    req.body.travelTime = travelTime;
+
+    // ✅ Create appointment
     const appointment = await Appointment.create(req.body);
 
     res.status(200).json({
