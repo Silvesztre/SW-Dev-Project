@@ -185,7 +185,9 @@ exports.logout = async (req, res, next) => {
   });
 };
 
-
+//@desc     Change password of user
+//@route    PUT /api/v1/auth/change-password
+//@access   Private
 exports.changePassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
