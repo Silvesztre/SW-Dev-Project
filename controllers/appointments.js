@@ -209,35 +209,39 @@ exports.updateAppointment = async (req, res, next) => {
       });
     }
 
-    // ✅ ADDED: Check ownership or admin permission
+    // ✅ Check ownership or admin permission
     if (
       appointment.user.toString() !== req.user.id &&
       req.user.role !== "admin"
     ) {
-      return res.status(400).json({
+      return res.status(403).json({
         success: false,
         message: `User ${req.user.id} is not authorized to update this appointment`,
       });
     }
 
-    // ✅ ADDED: Validate updated apptDate (if provided)
-    if (req.body.apptDate) {
-      const selectedDate = new Date(req.body.apptDate);
-      const rangeStart = new Date("2022-05-10T00:00:00");
-      const rangeEnd = new Date("2022-05-13T23:59:59");
-
-      if (selectedDate < rangeStart || selectedDate > rangeEnd) {
-        return res.status(400).json({
-          success: false,
-          message: "Appointment must be scheduled between May 10–13, 2022",
-        });
-      }
+    // ✅ Only allow apptDate to be updated
+    if (!req.body.apptDate || Object.keys(req.body).length > 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Only apptDate can be updated",
+      });
     }
 
-    appointment = await Appointment.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    // ✅ Validate apptDate range
+    const selectedDate = new Date(req.body.apptDate);
+    const rangeStart = new Date("2022-05-10T00:00:00");
+    const rangeEnd = new Date("2022-05-13T23:59:59");
+
+    if (selectedDate < rangeStart || selectedDate > rangeEnd) {
+      return res.status(400).json({
+        success: false,
+        message: "Appointment must be scheduled between May 10–13, 2022",
+      });
+    }
+
+    appointment.apptDate = selectedDate;
+    await appointment.save();
 
     res.status(200).json({
       success: true,
