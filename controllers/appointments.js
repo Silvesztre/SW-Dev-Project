@@ -146,7 +146,7 @@ exports.updateAppointment = async (req, res, next) => {
       });
     }
 
-    // Make sure the user is the appointment owner
+    // ✅ ADDED: Check ownership or admin permission
     if (
       appointment.user.toString() !== req.user.id &&
       req.user.role !== "admin"
@@ -155,6 +155,20 @@ exports.updateAppointment = async (req, res, next) => {
         success: false,
         message: `User ${req.user.id} is not authorized to update this appointment`,
       });
+    }
+
+    // ✅ ADDED: Validate updated apptDate (if provided)
+    if (req.body.apptDate) {
+      const selectedDate = new Date(req.body.apptDate);
+      const rangeStart = new Date("2022-05-10T00:00:00");
+      const rangeEnd = new Date("2022-05-13T23:59:59");
+
+      if (selectedDate < rangeStart || selectedDate > rangeEnd) {
+        return res.status(400).json({
+          success: false,
+          message: "Appointment must be scheduled between May 10–13, 2022",
+        });
+      }
     }
 
     appointment = await Appointment.findByIdAndUpdate(req.params.id, req.body, {
@@ -167,7 +181,7 @@ exports.updateAppointment = async (req, res, next) => {
       data: appointment,
     });
   } catch (error) {
-    console.log(error);
+    console.log(error.stack);
     return res.status(500).json({
       success: false,
       message: "Cannot update Appointment",
