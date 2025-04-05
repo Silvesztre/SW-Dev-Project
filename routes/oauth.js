@@ -30,6 +30,8 @@ router.get('/', async function (req, res, next) {
     } catch (err) {
         console.log("Error with signing in with Google")
     }
+
+    res.redirect(303, 'http://localhost:3000/');
 }) 
 
 module.exports=router
