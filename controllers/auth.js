@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const axios = require("axios");
 
 //@desc     Register user
 //@route    POST /api/v1/auth/register
@@ -6,32 +7,58 @@ const User = require("../models/User");
 
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password, role, telephone, homeAddress } = req.body;
+    const {
+      name,
+      email,
+      password,
+      role,
+      tel,
+      address,
+      district,
+      province,
+      postalcode,
+    } = req.body;
 
     // Validate required fields
-    if (!name || !email || !password || !telephone || !homeAddress) {
-      return res.status(400).json({
-        success: false,
-        msg: "Please provide all required fields: name, email, password, telephone, and homeAddress",
-      });
-    }
+    const requiredFields = {
+      name,
+      email,
+      password,
+      tel,
+      address,
+      district,
+      province,
+      postalcode,
+    };
 
-    // Validate nested homeAddress fields
-    const requiredAddressFields = [
-      "houseNumber",
-      "subdistrict",
-      "district",
-      "province",
-      "postalCode",
-    ];
-    const missingFields = requiredAddressFields.filter(
-      (field) => !homeAddress[field]
-    );
+    const missingFields = Object.entries(requiredFields)
+      .filter(([_, value]) => !value)
+      .map(([key]) => key);
+
     if (missingFields.length > 0) {
       return res.status(400).json({
         success: false,
-        msg: `Missing required address fields: ${missingFields.join(", ")}`,
+        msg: `Missing required fields: ${missingFields.join(", ")}`,
       });
+    }
+
+    // Geocoding request to HERE API
+    const apiKey = process.env.HERE_API_KEY;
+    const fullAddress = `${address} ${district} ${province} ${postalcode}`;
+    const geocodeUrl = `https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(
+      fullAddress
+    )}&apiKey=${apiKey}`;
+
+    const geoRes = await axios.get(geocodeUrl);
+    const geoItems = geoRes.data.items;
+
+    let latitude = null;
+    let longitude = null;
+
+    if (geoItems && geoItems.length > 0) {
+      const position = geoItems[0].position;
+      latitude = position.lat;
+      longitude = position.lng;
     }
 
     // Create user
@@ -40,16 +67,18 @@ exports.register = async (req, res, next) => {
       email,
       password,
       role,
-      telephone,
-      homeAddress,
+      tel,
+      address,
+      district,
+      province,
+      postalcode,
+      latitude,
+      longitude,
     });
 
     sendTokenResponse(user, 200, res);
   } catch (err) {
-    // ✅ Log full stack to console (for debugging)
     console.error(err.stack);
-
-    // ✅ Send error message to client (friendly)
     res.status(400).json({
       success: false,
       msg: err.message || "Registration failed",
