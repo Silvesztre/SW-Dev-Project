@@ -93,8 +93,22 @@ exports.addAppointment = async (req, res, next) => {
 
     // Add user Id to req.body
     req.body.user = req.user.id;
-    // Check for existed appointment
+
+    // ✅ ADDED: Validate appointment date is within May 10–13, 2022
+    const selectedDate = new Date(req.body.apptDate);
+    const rangeStart = new Date("2022-05-10T00:00:00");
+    const rangeEnd = new Date("2022-05-13T23:59:59");
+
+    if (selectedDate < rangeStart || selectedDate > rangeEnd) {
+      return res.status(400).json({
+        success: false,
+        message: "Appointment must be scheduled between May 10–13, 2022",
+      });
+    }
+
+    // Check for existing appointments
     const existedAppointment = await Appointment.find({ user: req.user.id });
+
     // If the user is not an admin, they can only create 3 appointments
     if (existedAppointment.length >= 3 && req.user.role !== "admin") {
       return res.status(400).json({
