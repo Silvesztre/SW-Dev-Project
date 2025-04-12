@@ -2,14 +2,11 @@ const express = require('express')
 const router = express.Router()
 const dotenv = require('dotenv')
 const { OAuth2Client } = require("google-auth-library")
+const jwt = require('jsonwebtoken')
+const User = require('../models/User')
+const { sendTokenResponse } = require('../controllers/auth')
 
 dotenv.config({ path: '../config/config.env' })
-
-async function getUserData(access_token) {
-    const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`)
-    const data = await response.json()
-    console.log('data', data)
-}
 
 /* GET home page */
 router.get('/', async function (req, res, next) {
@@ -21,17 +18,39 @@ router.get('/', async function (req, res, next) {
             process.env.CLIENT_SECRET,
             redirectUrl
         )
-        const res = await oAuth2Client.getToken(code)
-        await oAuth2Client.setCredentials(res.tokens)
-        console.log('Token acquired')
-        const user = oAuth2Client.credentials
-        console.log('credentials', user)
-        await getUserData(user.access_token)   
-    } catch (err) {
-        console.log("Error with signing in with Google")
-    }
+        const tokenResponse = await oAuth2Client.getToken(code)
+        await oAuth2Client.setCredentials(tokenResponse.tokens)
 
-    res.redirect(303, 'http://localhost:3000/');
+        const user = oAuth2Client.credentials
+
+        const ticket = await oAuth2Client.verifyIdToken({
+            idToken: user.id_token,
+            audience: process.env.CLIENT_ID
+        })
+
+        const payload = ticket.getPayload()
+
+        // console.log('payload', payload)
+
+        const email = payload.email
+
+        const appUser = await User.findOne({ email });
+
+        if (appUser) {
+            sendTokenResponse(appUser, 200, res);
+        } else {
+            const tempToken = jwt.sign({
+                email: payload.email,
+                name: payload.name,
+            }, process.env.JWT_SECRET, { expiresIn: '5m' })
+
+            res.redirect(`http://localhost:3000/register?token=${tempToken}`)
+        }
+    } catch (err) {
+        console.log("Error with signing in with Google", err)
+        res.status(500).send('OAuth login failed')
+    }
 }) 
+
 
 module.exports=router

@@ -227,6 +227,7 @@ const sendTokenResponse = (user, statusCode, res) => {
     token,
   });
 };
+exports.sendTokenResponse = sendTokenResponse;
 
 //@desc     Log user out / clear cookie
 //@route    GET /api/v1/auth/logout
