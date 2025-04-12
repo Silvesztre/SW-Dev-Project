@@ -25,19 +25,23 @@ const UserSchema = new mongoose.Schema({
   //ADDED: homeaddress
   address: {
     type: String,
-    required: [true, "Please add an address"],
+    // required: [true, "Please add an address"],
+    required: false,
   },
   district: {
     type: String,
-    required: [true, "Please add a district"],
+    // required: [true, "Please add a district"],
+    required: false,
   },
   province: {
     type: String,
-    required: [true, "Please add a province"],
+    // required: [true, "Please add a province"],
+    required: false,
   },
   postalcode: {
     type: String,
-    required: [true, "Please add a postal code"],
+    // required: [true, "Please add a postal code"],
+    required: false,
     maxlength: [5, "Postal Code can not be more than 5 digits"],
   },
   //ADDED: geolocation (latitude and longitude)

@@ -34,8 +34,17 @@ const CompanySchema = new mongoose.Schema(
       type: Number,
       required: [true, "Longitude is required"],
     },
+    website: {
+      type: String,
+      required: [true, "Website is required"]
+    },
+    description: {
+      type: String,
+      required: [true, "Description is required"]
+    },
     tel: {
       type: String,
+      required: [true, "Telephone number is required"]
     },
     region: {
       type: String,

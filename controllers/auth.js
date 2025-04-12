@@ -20,7 +20,7 @@ exports.register = async (req, res, next) => {
     } = req.body;
 
     // Validate required fields
-    const requiredFields = {
+    /* const requiredFields = {
       name,
       email,
       password,
@@ -29,6 +29,13 @@ exports.register = async (req, res, next) => {
       district,
       province,
       postalcode,
+    }; */
+
+    const requiredFields = {
+      name,
+      email,
+      password,
+      tel,
     };
 
     const missingFields = Object.entries(requiredFields)
@@ -42,8 +49,59 @@ exports.register = async (req, res, next) => {
       });
     }
 
+    let user
+
+    // If address is provided, calculate latitude and longitude of user address
+    if (address && district && province && postalcode) {
+
+      // Geocoding request to HERE API
+      const apiKey = process.env.HERE_API_KEY;
+      const fullAddress = `${address} ${district} ${province} ${postalcode}`;
+      const geocodeUrl = `https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(
+        fullAddress
+      )}&apiKey=${apiKey}`;
+
+      const geoRes = await axios.get(geocodeUrl);
+      const geoItems = geoRes.data.items;
+
+      let latitude = null;
+      let longitude = null;
+
+      if (geoItems && geoItems.length > 0) {
+        const position = geoItems[0].position;
+        latitude = position.lat;
+        longitude = position.lng;
+      }
+
+      // Create user
+      user = await User.create({
+        name,
+        email,
+        password,
+        role,
+        tel,
+        address,
+        district,
+        province,
+        postalcode,
+        latitude,
+        longitude,
+      });
+      
+    } else {
+      user = await User.create({
+        name,
+        email,
+        password,
+        role,
+        tel,
+      });
+    }
+
+    sendTokenResponse(user, 200, res);
+    
     // Geocoding request to HERE API
-    const apiKey = process.env.HERE_API_KEY;
+    /* const apiKey = process.env.HERE_API_KEY;
     const fullAddress = `${address} ${district} ${province} ${postalcode}`;
     const geocodeUrl = `https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(
       fullAddress
@@ -62,7 +120,7 @@ exports.register = async (req, res, next) => {
     }
 
     // Create user
-    const user = await User.create({
+    user = await User.create({
       name,
       email,
       password,
@@ -76,7 +134,7 @@ exports.register = async (req, res, next) => {
       longitude,
     });
 
-    sendTokenResponse(user, 200, res);
+    sendTokenResponse(user, 200, res); */
   } catch (err) {
     console.error(err.stack);
     res.status(400).json({
