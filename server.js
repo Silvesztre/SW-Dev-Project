@@ -22,6 +22,7 @@ const companies = require('./routes/companies')
 const appointments = require('./routes/appointments')
 const auth = require('./routes/auth')
 const oauth = require('./routes/oauth')
+const users = require('./routes/users')
 
 const app = express()
 
@@ -55,6 +56,7 @@ app.use('/api/v1/companies', companies)
 app.use('/api/v1/appointments', appointments)
 app.use('/api/v1/auth', auth)
 app.use('/oauth', oauth)
+app.use('/api/v1/users', users)
 
 const PORT = process.env.PORT || 5000
 
