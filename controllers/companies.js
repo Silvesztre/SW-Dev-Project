@@ -1,5 +1,5 @@
 const Company = require("../models/Company");
-const Appointment = require("../models/Appointment");
+const Appointment = require("../models/Booking");
 const axios = require("axios");
 //@desc     Get all companies
 //@route    GET /api/v1/companies
@@ -26,7 +26,15 @@ exports.getCompanies = async (req, res, next) => {
   );
 
   // Finding resource
-  query = Company.find(JSON.parse(queryStr)).populate("appointments");
+  const user = req.user
+
+  query = user
+  ? Company.find(JSON.parse(queryStr)).populate({
+      path: "appointments",
+      match: { user: user.userId },
+    })
+  : Company.find(JSON.parse(queryStr));
+
 
   // Select fields
   if (req.query.select) {
@@ -48,8 +56,14 @@ exports.getCompanies = async (req, res, next) => {
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
 
+  console.log("endIndex: ", endIndex)
+  console.log("startIndex: ", startIndex)
+  console.log("limit: ", limit)
+
   try {
     const total = await Company.countDocuments(); // total of matched elements
+    console.log("total: ", total);
+
     query = query.skip(startIndex).limit(limit);
 
     // Execute query

@@ -19,7 +19,7 @@ connectDB()
 
 // Route files
 const companies = require('./routes/companies')
-const appointments = require('./routes/appointments')
+const bookings = require('./routes/bookings')
 const auth = require('./routes/auth')
 const oauth = require('./routes/oauth')
 const users = require('./routes/users')
@@ -53,7 +53,7 @@ app.use(limiter)
 app.use(hpp())
 
 app.use('/api/v1/companies', companies)
-app.use('/api/v1/appointments', appointments)
+app.use('/api/v1/bookings', bookings)
 app.use('/api/v1/auth', auth)
 app.use('/oauth', oauth)
 app.use('/api/v1/users', users)
