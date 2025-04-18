@@ -6,6 +6,21 @@ const UserSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, "Please add a name"],
+    validate: [
+      {
+        validator: function (v) {
+          return !/^\d/.test(v); // cannot start with a digit
+        },
+        message: "Name cannot start with a number"
+      },
+      {
+        validator: function (v) {
+          // allows Thai, English, and spaces only
+          return /^[a-zA-Zก-๙\s]+$/.test(v);
+        },
+        message: "Name can only contain Thai and English letters"
+      }
+    ]
   },
   email: {
     type: String,
@@ -20,7 +35,7 @@ const UserSchema = new mongoose.Schema({
   tel: {
     type: String,
     required: [true, "Please add a telephone number"],
-    match: [/^(0[689]{1}[0-9]{8})$/, "Please add a valid telephone number"],
+    match: [/^(0[0-9]{9})$/, "Please add a valid telephone number"],
   },
   //ADDED: homeaddress
   address: {
