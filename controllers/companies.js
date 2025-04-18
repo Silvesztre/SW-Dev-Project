@@ -48,13 +48,8 @@ exports.getCompanies = async (req, res, next) => {
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
 
-  console.log("endIndex: ", endIndex)
-  console.log("startIndex: ", startIndex)
-  console.log("limit: ", limit)
-
   try {
     const total = await Company.countDocuments(); // total of matched elements
-    console.log("total: ", total);
 
     query = query.skip(startIndex).limit(limit);
 
