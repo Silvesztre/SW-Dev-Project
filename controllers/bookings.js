@@ -101,8 +101,17 @@ exports.addBooking = async (req, res, next) => {
       });
     }
 
-    // ✅ Validate apptDate is between May 10–13, 2022
+    // ✅ Validate apptDate format
     const selectedDate = new Date(req.body.apptDate);
+
+    if (isNaN(selectedDate.getTime())) {
+      return res.status(400).json({ 
+        success: false,
+        msg: "Invalid appDate format" 
+      });
+    }
+
+    // ✅ Validate apptDate range (May 10-13, 2022)
     const rangeStart = new Date("2022-05-10T00:00:00");
     const rangeEnd = new Date("2022-05-13T23:59:59");
 
@@ -234,8 +243,17 @@ exports.updateBooking = async (req, res, next) => {
       });
     }
 
-    // ✅ Validate apptDate range
+    // ✅ Validate apptDate format
     const selectedDate = new Date(req.body.apptDate);
+
+    if (isNaN(selectedDate.getTime())) {
+      return res.status(400).json({ 
+        success: false,
+        msg: "Invalid appDate format" 
+      });
+    }
+
+    // ✅ Validate apptDate range
     const rangeStart = new Date("2022-05-10T00:00:00");
     const rangeEnd = new Date("2022-05-13T23:59:59");
 
