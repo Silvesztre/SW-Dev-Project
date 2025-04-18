@@ -1,2 +1,5 @@
-# Command
+# Base Requirement
 newman run SW_Dev.postman_collection.json -e My_environment.postman_environment.json
+
+# Additional Requirement
+newman run Additional.postman_collection.json -e My_environment.postman_environment.json

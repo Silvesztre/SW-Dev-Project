@@ -252,7 +252,7 @@ exports.changePassword = async (req, res, next) => {
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ success: false, error: "Please provide current and new passwords" });
+      return res.status(400).json({ success: false, msg: "Please provide current and new passwords" });
     }
 
     let user = await User.findById(req.user.id).select("+password");
@@ -260,7 +260,11 @@ exports.changePassword = async (req, res, next) => {
     const isMatch = await user.matchPassword(currentPassword);
 
     if (!isMatch) {
-      return res.status(401).json({ success: false, error: "Current password is incorrect" });
+      return res.status(401).json({ success: false, msg: "Current password is incorrect" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, msg: "The minimum lenght of the password is 6 characters" })
     }
 
     user.password = newPassword;
