@@ -1,0 +1,2 @@
+# Command
+newman run SW_Dev.postman_collection.json -e My_environment.postman_environment.json
