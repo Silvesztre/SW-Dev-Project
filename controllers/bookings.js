@@ -107,7 +107,7 @@ exports.addBooking = async (req, res, next) => {
     if (isNaN(selectedDate.getTime())) {
       return res.status(400).json({ 
         success: false,
-        msg: "Invalid appDate format" 
+        msg: "Invalid apptDate format" 
       });
     }
 
@@ -249,7 +249,7 @@ exports.updateBooking = async (req, res, next) => {
     if (isNaN(selectedDate.getTime())) {
       return res.status(400).json({ 
         success: false,
-        msg: "Invalid appDate format" 
+        msg: "Invalid apptDate format" 
       });
     }
 
