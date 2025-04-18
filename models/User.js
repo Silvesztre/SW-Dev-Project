@@ -11,14 +11,14 @@ const UserSchema = new mongoose.Schema({
         validator: function (v) {
           return !/^\d/.test(v); // cannot start with a digit
         },
-        message: "Name cannot start with a number"
+        message: "Please add a valid name"
       },
       {
         validator: function (v) {
           // allows Thai, English, and spaces only
           return /^[a-zA-Zก-๙\s]+$/.test(v);
         },
-        message: "Name can only contain Thai and English letters"
+        message: "Please add a valid name"
       }
     ]
   },
