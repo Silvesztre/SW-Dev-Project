@@ -8,13 +8,13 @@ const {
 } = require('../controllers/companies')
 
 // Include other resource routers
-const appointmentRouter = require('./bookings')
+const bookingRouter = require('./bookings')
 
 const router = express.Router()
 const { protect, authorize } = require('../middleware/auth')
 
 // Re-route into other resource routers
-router.use('/:companyId/appointments/', appointmentRouter)
+router.use('/:companyId/bookings/', bookingRouter)
 
 router.route('/').get(getCompanies).post(protect, authorize('admin'), createCompany)
 router.route('/:id').get(getCompany).put(protect, authorize('admin'), updateCompany)

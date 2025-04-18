@@ -58,8 +58,8 @@ const CompanySchema = new mongoose.Schema(
 );
 
 // Reverse populate with virtuals
-CompanySchema.virtual("appointments", {
-  ref: "Appointment",
+CompanySchema.virtual("bookings", {
+  ref: "Booking",
   localField: "_id",
   foreignField: "company",
   justOne: false,

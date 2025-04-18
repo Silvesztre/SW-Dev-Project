@@ -1,5 +1,5 @@
 const Company = require("../models/Company");
-const Appointment = require("../models/Booking");
+const Booking = require("../models/Booking");
 const axios = require("axios");
 //@desc     Get all companies
 //@route    GET /api/v1/companies
@@ -26,15 +26,7 @@ exports.getCompanies = async (req, res, next) => {
   );
 
   // Finding resource
-  const user = req.user
-
-  query = user
-  ? Company.find(JSON.parse(queryStr)).populate({
-      path: "appointments",
-      match: { user: user.userId },
-    })
-  : Company.find(JSON.parse(queryStr));
-
+  query = Company.find(JSON.parse(queryStr));
 
   // Select fields
   if (req.query.select) {
@@ -225,7 +217,7 @@ exports.deleteCompany = async (req, res, next) => {
         message: `Company not found with id of ${req.params.id}`,
       });
     }
-    await Appointment.deleteMany({ company: req.params.id });
+    await Booking.deleteMany({ company: req.params.id });
     await Company.deleteOne({ _id: req.params.id });
 
     res.status(200).json({ success: true, data: {} });
