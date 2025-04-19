@@ -31,7 +31,7 @@ export default function Page() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const telRegex = /^(0[689][0-9]{8})$/;
+    const telRegex = /^(0[0-9]{9})$/;
     if (!telRegex.test(tel)) {
       setError("Invalid phone number format");
       return;

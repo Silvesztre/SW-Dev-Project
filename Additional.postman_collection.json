@@ -314,7 +314,7 @@
 							"    pm.response.to.have.status(200);\r",
 							"});\r",
 							"\r",
-							"pm.execution.setNextRequest(\"null\")"
+							"pm.execution.setNextRequest(\"Get All Companies\")"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -350,6 +350,337 @@
 						"v1",
 						"auth",
 						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Companies",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json()\r",
+							"\r",
+							"pm.test(\"There are some companies!!\", () => {\r",
+							"    pm.expect(response.count).to.be.above(0)\r",
+							"})\r",
+							"\r",
+							"const first_company = response.data[0]._id\r",
+							"const second_company = response.data[1]._id\r",
+							"const third_company = response.data[2]._id\r",
+							"\r",
+							"pm.globals.set(\"global_first_company\", first_company)\r",
+							"pm.globals.set(\"global_second_company\", second_company)\r",
+							"pm.globals.set(\"global_third_company\", third_company)\r",
+							"\r",
+							"pm.execution.setNextRequest(\"Booking No Address\")"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/api/v1/companies",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"companies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Booking No Address",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json()\r",
+							"\r",
+							"pm.test(\"Should not contain travelTime attribute\", function () {\r",
+							"    pm.expect(response.data).to.not.have.property(\"travelTime\");\r",
+							"});\r",
+							"\r",
+							"pm.globals.set(\"global_first_booking\", response.data._id)\r",
+							"\r",
+							"pm.execution.setNextRequest(\"Update Address Missing\")"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": "JSON Type",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"apptDate\": \"2022-05-10T00:00:00\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/api/v1/companies/:company_id/bookings",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"companies",
+						":company_id",
+						"bookings"
+					],
+					"variable": [
+						{
+							"key": "company_id",
+							"value": "{{global_first_company}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Address Missing",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Should contain missing fields error message\", function () {\r",
+							"    const jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property(\"msg\");\r",
+							"    pm.expect(jsonData.msg).to.include(\"Missing required fields: district, postalcode\");\r",
+							"});\r",
+							"\r",
+							"pm.execution.setNextRequest(\"Update Address\")"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"address\": \"81 Magnolias Waterfront Residences, ถนนเจริญนคร\",\r\n  \"province\": \"กรุงเทพมหานคร\"\r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/api/v1/users/:userId/address",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"users",
+						":userId",
+						"address"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "{{global_user_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Address",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.execution.setNextRequest(\"Booking With Address\")"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"address\": \"81 Magnolias Waterfront Residences, ถนนเจริญนคร\",\r\n  \"district\": \"คลองสาน\",\r\n  \"province\": \"กรุงเทพมหานคร\",\r\n  \"postalcode\": \"10600\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/api/v1/users/:userId/address",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"users",
+						":userId",
+						"address"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "{{global_user_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Booking With Address",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json()\r",
+							"\r",
+							"pm.test(\"Should contain travelTime attribute\", function () {\r",
+							"    pm.expect(response.data).to.have.property(\"travelTime\");\r",
+							"});\r",
+							"\r",
+							"pm.execution.setNextRequest(\"null\")"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": "JSON Type",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"apptDate\": \"2022-05-10T00:00:00\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/api/v1/companies/:company_id/bookings",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"companies",
+						":company_id",
+						"bookings"
+					],
+					"variable": [
+						{
+							"key": "company_id",
+							"value": "{{global_first_company}}"
+						}
 					]
 				}
 			},
