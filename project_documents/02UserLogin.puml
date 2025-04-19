@@ -1,0 +1,35 @@
+@startuml UserLogin
+title User/Admin Log-in
+
+actor Client
+participant "«JavaScript»\nserver" as Server
+participant "«router»\nauth" as AuthRouter
+participant "«controllers»\nauth" as AuthController
+participant "«model»\nUser" as UserModel
+database "«MongoDB»\nusers" as MongoDB
+
+Client -> Server: POST /api/v1/auth/login (req.body)
+activate Server
+Server -> AuthRouter: app.use('/auth', auth)
+activate AuthRouter
+AuthRouter -> AuthController: login(req.body)
+activate AuthController
+AuthController -> UserModel: User.findOne({ email }).select("+password")
+activate UserModel
+UserModel -> MongoDB: Query user by email
+activate MongoDB
+MongoDB --> UserModel: User data
+deactivate MongoDB
+UserModel --> AuthController: user
+deactivate UserModel
+
+AuthController -> AuthController: user.matchPassword(password)
+AuthController -> AuthController: Generate JWT token
+AuthController --> AuthRouter: response (success, token)
+deactivate AuthController
+AuthRouter --> Server: response
+deactivate AuthRouter
+Server --> Client: response (success, token)
+deactivate Server
+
+@enduml

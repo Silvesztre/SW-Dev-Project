@@ -1,0 +1,38 @@
+@startuml UserViewBooking
+title User/Admin View Booking
+
+actor Client
+participant "«JavaScript»\nserver" as Server
+participant "«router»\nbookings" as BookingsRouter
+participant "«controllers»\nbookings" as BookingsController
+participant "«model»\nBooking" as BookingModel
+database "«MongoDB»\nbookings" as MongoDBBookings
+
+Client -> Server: GET /api/v1/bookings
+activate Server
+Server -> BookingsRouter: route GET /bookings
+activate BookingsRouter
+BookingsRouter -> BookingsController: getBookings(req.query, req.user)
+activate BookingsController
+
+alt if user is not admin
+    BookingsController -> BookingModel: Booking.find({ user: req.user.id }).populate(company)
+else if admin
+    BookingsController -> BookingModel: Booking.find().populate(company)
+end
+activate BookingModel
+BookingModel -> MongoDBBookings: Query bookings
+activate MongoDBBookings
+MongoDBBookings --> BookingModel: Booking data
+deactivate MongoDBBookings
+BookingModel --> BookingsController: Booking data
+deactivate BookingModel
+
+BookingsController --> BookingsRouter: response (success, bookings)
+deactivate BookingsController
+BookingsRouter --> Server: response
+deactivate BookingsRouter
+Server --> Client: response (success, bookings)
+deactivate Server
+
+@enduml

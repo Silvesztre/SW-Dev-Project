@@ -1,0 +1,53 @@
+@startuml RegistrationAndValidationCheck
+title User Registration + Validation Check (Including Google OAuth)
+
+actor Client
+participant "«JavaScript»\nserver" as Server
+participant "«router»\nauth" as AuthRouter
+participant "«controllers»\nauth" as AuthController
+participant "«model»\nUser" as UserModel
+database "«MongoDB»\nusers" as MongoDB
+participant "«Google API»\nOAuth" as GoogleOAuth
+
+Client -> Server: POST /api/v1/auth/register (req.body)
+activate Server
+alt Traditional Registration
+    Server -> AuthRouter: app.use('/auth', auth)
+    activate AuthRouter
+    AuthRouter -> AuthController: register(req.body)
+    activate AuthController
+    AuthController -> UserModel: User.create(req.body)
+    activate UserModel
+    UserModel -> MongoDB: Insert new user
+    activate MongoDB
+    MongoDB --> UserModel: Created user
+    deactivate MongoDB
+    UserModel --> AuthController: user
+    deactivate UserModel
+    AuthController --> AuthRouter: response (success, token)
+    deactivate AuthController
+    AuthRouter --> Server: response
+    deactivate AuthRouter
+else Google OAuth Registration
+    Client -> GoogleOAuth: Redirect to Google OAuth
+    GoogleOAuth --> Client: Authorization Code
+    Client -> Server: POST /api/v1/auth/google (authCode)
+    Server -> AuthController: googleAuth(authCode)
+    activate AuthController
+    AuthController -> GoogleOAuth: Verify authCode and fetch user details
+    GoogleOAuth --> AuthController: user details (email, name, etc.)
+    AuthController -> UserModel: Find or Create User (email)
+    activate UserModel
+    UserModel -> MongoDB: Query or Insert user
+    activate MongoDB
+    MongoDB --> UserModel: User data
+    deactivate MongoDB
+    UserModel --> AuthController: user
+    deactivate UserModel
+    AuthController --> Server: response (success, token)
+    deactivate AuthController
+end
+Server --> Client: response (success, token)
+deactivate Server
+
+@enduml
