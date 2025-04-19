@@ -1,0 +1,23 @@
+@startuml UserLogout
+title User Logout
+
+actor Client
+participant "«JavaScript»\nserver" as Server
+participant "«router»\nauth" as AuthRouter
+participant "«controllers»\nauth" as AuthController
+
+Client -> Server: GET /api/v1/auth/logout
+activate Server
+Server -> AuthRouter: route GET /auth/logout
+activate AuthRouter
+AuthRouter -> AuthController: logout(req)
+activate AuthController
+AuthController -> AuthController: Clear token/session data
+AuthController --> AuthRouter: response (success, logged out)
+deactivate AuthController
+AuthRouter --> Server: response
+deactivate AuthRouter
+Server --> Client: response (success, logged out)
+deactivate Server
+
+@enduml

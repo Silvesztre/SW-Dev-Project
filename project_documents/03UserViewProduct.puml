@@ -1,0 +1,32 @@
+@startuml UserViewProduct
+title User View Product (Company)
+
+actor Client
+participant "«JavaScript»\nserver" as Server
+participant "«router»\ncompanies" as CompaniesRouter
+participant "«controllers»\ncompanies" as CompaniesController
+participant "«model»\nCompany" as CompanyModel
+database "«MongoDB»\ncompanies" as MongoDB
+
+Client -> Server: GET /api/v1/companies
+activate Server
+Server -> CompaniesRouter: app.use('/companies', companies)
+activate CompaniesRouter
+CompaniesRouter -> CompaniesController: getCompanies(req.query)
+activate CompaniesController
+CompaniesController -> CompanyModel: Company.find(req.query)
+activate CompanyModel
+CompanyModel -> MongoDB: Query companies
+activate MongoDB
+MongoDB --> CompanyModel: Companies data
+deactivate MongoDB
+CompanyModel --> CompaniesController: Companies data
+deactivate CompanyModel
+CompaniesController --> CompaniesRouter: response (success, companies)
+deactivate CompaniesController
+CompaniesRouter --> Server: response
+deactivate CompaniesRouter
+Server --> Client: response (success, companies)
+deactivate Server
+
+@enduml

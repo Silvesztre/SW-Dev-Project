@@ -1,0 +1,54 @@
+@startuml UserEditBooking
+title User/Admin Edit Booking
+
+actor Client
+participant "«JavaScript»\nserver" as Server
+participant "«router»\nbookings" as BookingsRouter
+participant "«controllers»\nbookings" as BookingsController
+participant "«model»\nBooking" as BookingModel
+database "«MongoDB»\nbookings" as MongoDBBookings
+
+Client -> Server: PUT /api/v1/bookings/:id (req.body)
+activate Server
+Server -> BookingsRouter: route PUT /bookings/:id
+activate BookingsRouter
+BookingsRouter -> BookingsController: updateBooking(req.body, req.params, req.user)
+activate BookingsController
+
+BookingsController -> BookingModel: Booking.findById(req.params.id)
+activate BookingModel
+BookingModel -> MongoDBBookings: Query booking by ID
+activate MongoDBBookings
+MongoDBBookings --> BookingModel: Booking data
+deactivate MongoDBBookings
+BookingModel --> BookingsController: Booking data
+deactivate BookingModel
+
+BookingsController -> BookingsController: Verify booking exists
+
+alt booking.user == req.user.id or req.user.role == "admin"
+    BookingsController -> BookingsController: Validate apptDate format & range
+    alt Invalid apptDate
+        BookingsController --> BookingsRouter: response (error: invalid apptDate)
+    else Valid apptDate
+        BookingsController -> BookingModel: Booking.findByIdAndUpdate(req.params.id, { apptDate: req.body.apptDate })
+        activate BookingModel
+        BookingModel -> MongoDBBookings: Update booking apptDate
+        activate MongoDBBookings
+        MongoDBBookings --> BookingModel: Updated booking data
+        deactivate MongoDBBookings
+        BookingModel --> BookingsController: Updated booking data
+        deactivate BookingModel
+        BookingsController --> BookingsRouter: response (success: updated booking)
+    end
+else
+    BookingsController --> BookingsRouter: response (error: unauthorized)
+end
+deactivate BookingsController
+
+BookingsRouter --> Server: response
+deactivate BookingsRouter
+Server --> Client: response (success or error)
+deactivate Server
+
+@enduml

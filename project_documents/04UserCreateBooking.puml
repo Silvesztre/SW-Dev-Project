@@ -1,0 +1,67 @@
+@startuml UserCreateBooking
+title User Create Booking
+
+actor Client
+participant "«JavaScript»\nserver" as Server
+participant "«router»\nbookings" as BookingsRouter
+participant "«controllers»\nbookings" as BookingsController
+participant "«model»\nBooking" as BookingModel
+participant "«model»\nCompany" as CompanyModel
+participant "«model»\nUser" as UserModel
+database "«MongoDB»\nbookings" as MongoDBBookings
+database "«MongoDB»\ncompanies" as MongoDBCompanies
+database "«MongoDB»\nusers" as MongoDBUsers
+participant "«TravelTime API»" as TravelTimeAPI
+
+Client -> Server: POST /api/v1/companies/:companyId/bookings (req.body)
+activate Server
+Server -> BookingsRouter: app.use('/bookings', bookings)
+activate BookingsRouter
+BookingsRouter -> BookingsController: addBooking(req.body, req.params)
+activate BookingsController
+
+BookingsController -> CompanyModel: Company.findById(req.params.companyId)
+activate CompanyModel
+CompanyModel -> MongoDBCompanies: Query company by ID
+activate MongoDBCompanies
+MongoDBCompanies --> CompanyModel: Company data
+deactivate MongoDBCompanies
+CompanyModel --> BookingsController: Company data
+deactivate CompanyModel
+
+BookingsController -> UserModel: User.findById(req.user.id)
+activate UserModel
+UserModel -> MongoDBUsers: Query user by ID
+activate MongoDBUsers
+MongoDBUsers --> UserModel: User data
+deactivate MongoDBUsers
+UserModel --> BookingsController: User data
+deactivate UserModel
+
+BookingsController -> BookingsController: Validate apptDate format and range
+BookingsController -> BookingsController: Check booking limit (max 3)
+
+alt User has address data
+    BookingsController -> TravelTimeAPI: Calculate travel time (user to company)
+    activate TravelTimeAPI
+    TravelTimeAPI --> BookingsController: Travel time
+    deactivate TravelTimeAPI
+end
+
+BookingsController -> BookingModel: Booking.create(req.body)
+activate BookingModel
+BookingModel -> MongoDBBookings: Insert new booking
+activate MongoDBBookings
+MongoDBBookings --> BookingModel: Created booking
+deactivate MongoDBBookings
+BookingModel --> BookingsController: Created booking
+deactivate BookingModel
+
+BookingsController --> BookingsRouter: response (success, booking)
+deactivate BookingsController
+BookingsRouter --> Server: response
+deactivate BookingsRouter
+Server --> Client: response (success, booking)
+deactivate Server
+
+@enduml
