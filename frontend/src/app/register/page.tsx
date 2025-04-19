@@ -9,6 +9,10 @@ interface JwtPayload {
   email: string;
 }
 
+function navigate(url: any) {
+  window.location.href = url
+}
+
 export default function Page() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -63,6 +67,7 @@ export default function Page() {
 
       setSuccess("Registration successful!");
       setError("");
+      navigate("http://localhost:3000");
     } catch (err: any) {
       setError(err.message || "Submission failed");
       setSuccess("");
