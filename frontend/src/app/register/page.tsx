@@ -119,7 +119,7 @@ export default function Page() {
             type="tel"
             placeholder="Enter phone number"
             className="w-4/5 border-gray-400 border-2 rounded-md pl-1 pb-1"
-            pattern="0[689][0-9]{8}"
+            pattern="0[0-9]{9}"
             required
             title="Please enter a valid phone number"
             value={tel}

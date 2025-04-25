@@ -18,20 +18,15 @@ router.get('/', async function (req, res, next) {
             process.env.CLIENT_SECRET,
             redirectUrl
         )
-        const tokenResponse = await oAuth2Client.getToken(code)
-        await oAuth2Client.setCredentials(tokenResponse.tokens)
-
-        const user = oAuth2Client.credentials
+        const { tokens } = await oAuth2Client.getToken(code)
+        await oAuth2Client.setCredentials(tokens)
 
         const ticket = await oAuth2Client.verifyIdToken({
-            idToken: user.id_token,
+            idToken: tokens.id_token,
             audience: process.env.CLIENT_ID
         })
 
         const payload = ticket.getPayload()
-
-        // console.log('payload', payload)
-
         const email = payload.email
 
         const appUser = await User.findOne({ email });
