@@ -31,7 +31,6 @@ package "SW-Dev-Project" {
         <<GET>> +getMe(): User
         <<GET>> +logout(): void
         <<PUT>> +changePassword(): void
-        <<POST>> +googleOAuth(): URL
     }
 
     class "<<Resource>>\nUsers" as ResourceUsers {
@@ -78,10 +77,6 @@ package "SW-Dev-Project" {
     class "<<External API>>\nTravelTime API" as TravelTimeAPI {
         <<POST>> +calculateTravelTime(): TravelTime
     }
-
-    class "<<External API>>\nGoogle OAuth API" as GoogleOAuthAPI {
-        <<POST>> +authenticate(): Token
-    }
 }
 
 SWDevService ..> ResourceCompanies: "/api/v1/companies\n<<Path>>"
@@ -94,7 +89,6 @@ ResourceBooking ..> RepresentationBooking: "<<use>>"
 
 SWDevService ..> ResourceAuth: "/api/v1/auth\n<<Path>>"
 ResourceAuth ..> RepresentationUser: "<<use>>"
-ResourceAuth ..> GoogleOAuthAPI: "<<use>>"
 
 SWDevService ..> ResourceUsers: "/api/v1/users/{userId}/address\n<<Path>>"
 ResourceUsers ..> RepresentationUser: "<<use>>"
