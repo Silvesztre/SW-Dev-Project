@@ -1,0 +1,101 @@
+@startuml
+left to right direction
+package "SW-Dev-Project" {
+    class "<<Application>>\nSWDevService" as SWDevService {}
+
+    class "<<Resource>>\nCompanies" as ResourceCompanies {
+        <<GET>> +getCompanies(): Company[]
+        <<POST>> +createCompany(): Company
+    }
+
+    class "<<Resource>>\nCompany" as ResourceCompany {
+        <<GET>> +getCompany(): Company
+        <<PUT>> +updateCompany(): Company
+        <<DELETE>> +deleteCompany(): void
+    }
+
+    class "<<Resource>>\nBookings" as ResourceBookings {
+        <<GET>> +getBookings(): Booking[]
+        <<POST>> +addBooking(): Booking
+    }
+
+    class "<<Resource>>\nBooking" as ResourceBooking {
+        <<GET>> +getBooking(): Booking
+        <<PUT>> +updateBooking(): Booking
+        <<DELETE>> +deleteBooking(): void
+    }
+
+    class "<<Resource>>\nAuth" as ResourceAuth {
+        <<POST>> +register(): User
+        <<POST>> +login(): Token
+        <<GET>> +getMe(): User
+        <<GET>> +logout(): void
+        <<PUT>> +changePassword(): void
+    }
+
+    class "<<Resource>>\nUsers" as ResourceUsers {
+        <<PATCH>> +editUserAddress(): User
+    }
+
+    class "<<Representation>>\nCompany" as RepresentationCompany {
+        -name
+        -address
+        -district
+        -province
+        -postalcode
+        -latitude
+        -longitude
+        -tel
+        -region
+    }
+
+    class "<<Representation>>\nBooking" as RepresentationBooking {
+        -apptDate
+        -user
+        -company
+        -travelTime
+    }
+
+    class "<<Representation>>\nUser" as RepresentationUser {
+        -name
+        -email
+        -password
+        -tel
+        -address
+        -district
+        -province
+        -postalcode
+        -latitude
+        -longitude
+        -role
+    }
+
+    class "<<External API>>\nHERE Geocoding API" as HereGeocodingAPI {
+        <<GET>> +geocodeAddress(): Coordinates
+    }
+
+    class "<<External API>>\nTravelTime API" as TravelTimeAPI {
+        <<POST>> +calculateTravelTime(): TravelTime
+    }
+}
+
+SWDevService ..> ResourceCompanies: "/api/v1/companies\n<<Path>>"
+ResourceCompanies ..> ResourceCompany: "/{companyId}\n<<Path>>"
+ResourceCompany ..> RepresentationCompany: "<<use>>"
+
+SWDevService ..> ResourceBookings: "/api/v1/bookings\n<<Path>>"
+ResourceBookings ..> ResourceBooking: "/{bookingId}\n<<Path>>"
+ResourceBooking ..> RepresentationBooking: "<<use>>"
+
+SWDevService ..> ResourceAuth: "/api/v1/auth\n<<Path>>"
+ResourceAuth ..> RepresentationUser: "<<use>>"
+
+SWDevService ..> ResourceUsers: "/api/v1/users/{userId}/address\n<<Path>>"
+ResourceUsers ..> RepresentationUser: "<<use>>"
+
+ResourceCompany ..> HereGeocodingAPI: "<<use>>"
+ResourceUsers ..> HereGeocodingAPI: "<<use>>"
+ResourceAuth ..> HereGeocodingAPI: "<<use>>"
+ResourceBookings ..> TravelTimeAPI: "<<use>>"
+
+@enduml
